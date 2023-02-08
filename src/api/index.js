@@ -8,34 +8,18 @@ const ApiClient = axios.create({
     }
 });
 
-export const getTodoAPI = async (param, callback) => {
-    await ApiClient.get(`/todo`, param).then(async (res) => {
-        if (callback) {
-            await callback(res);
-        }
-    })
+export const getTodoAPI = async () => {
+    const { data } = await ApiClient.get(`/todo`)
+    return data
 }
 
-export const postTodoAPI = async (param, callback) => {
-    await ApiClient.post(`/todo`, param).then(async (res) => {
-        if (callback) {
-            await callback(res);
-        }
-    })
+export const postTodoAPI = async (param) => {
+    await ApiClient.post(`/todo`, param);
 }
 
-export const putTodoAPI = async (param, callback) => {
-    await ApiClient.put(`/todo`, param).then(async (res) => {
-        if (callback) {
-            await callback(res);
-        }
-    })
+export const putTodoAPI = async (param) => {
+    await ApiClient.put(`/todo`, param);
 }
-export const deleteTodoAPI = async (param, callback) => {
-    await ApiClient.post(`/delete-todo`, param).then(async (res) => {
-        if (callback) {
-            await callback(res);
-        }
-    })
+export const deleteTodoAPI = async (param) => {
+    await ApiClient.post(`/delete-todo`, param);
 }
-
