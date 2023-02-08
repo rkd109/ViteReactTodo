@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
-import { FaCheck, FaCircle, FaRegTrashAlt } from "react-icons/fa";
 import _ from 'lodash';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getTodoAPI, deleteTodoAPI, postTodoAPI, putTodoAPI } from '../api'
+import TodoList from './TodoList'
+import { todoKey } from './key';
 
 const Todo = () => {
-    const [todo, setTodo] = useState("");
     const queryClient = useQueryClient()
+    const [todo, setTodo] = useState("");
 
     const { isLoading, isError, data, error } = useQuery({
-        queryKey: ['todos'],
+        queryKey: todoKey,
         queryFn: getTodoAPI,
     })
 
@@ -19,7 +20,9 @@ const Todo = () => {
         mutationFn: postTodoAPI,
         onSuccess: () => {
             // Invalidate and refetch
-            queryClient.invalidateQueries({ queryKey: ['todos'] })
+            setTodo('');
+
+            queryClient.invalidateQueries({ queryKey: todoKey })
         },
     })
 
@@ -27,7 +30,7 @@ const Todo = () => {
         mutationFn: putTodoAPI,
         onSuccess: () => {
             // Invalidate and refetch
-            queryClient.invalidateQueries({ queryKey: ['todos'] })
+            queryClient.invalidateQueries({ queryKey: todoKey })
         },
     })
 
@@ -35,7 +38,7 @@ const Todo = () => {
         mutationFn: deleteTodoAPI,
         onSuccess: () => {
             // Invalidate and refetch
-            queryClient.invalidateQueries({ queryKey: ['todos'] })
+            queryClient.invalidateQueries({ queryKey: todoKey })
         },
     })
 
@@ -43,18 +46,18 @@ const Todo = () => {
         setTodo(value)
     }
 
-    const setTodosEvent = () => {
+    const setTodosEvent = async () => {
         const _todo = { id: uuidv4(), value: todo, checked: false }
-        postTodoMutation.mutate(_todo);
+        await postTodoMutation.mutateAsync(_todo);
         setTodo("");
     }
 
     const setTodoCheckdEvent = async (id, checked) => {
-        putTodoMutation.mutate({ id, checked: !checked })
+        await putTodoMutation.mutateAsync({ id, checked: !checked })
     }
 
     const setTodoDeleteEvent = async (id) => {
-        deleteTodoMutation.mutate({ id })
+        await deleteTodoMutation.mutateAsync({ id })
     }
 
     if (isLoading) {
@@ -66,23 +69,9 @@ const Todo = () => {
     }
 
     return (
-        <div className="App">
-            <input type="text" value={todo} onChange={(e) => setTodoEvent(e.target.value)}></input>
-            <input type="button" onClick={() => setTodosEvent()} value="저장"></input>
-            {
-                data.map((element, index) => {
-                    return <div key={index} style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div onClick={() => setTodoCheckdEvent(element.id, element.checked)}>
-                            {element.checked ? <FaCheck /> : <FaCircle />}
-                        </div>
-                        {element.value}
-                        <div onClick={() => setTodoDeleteEvent(element.id)}>
-                            <FaRegTrashAlt />
-                        </div>
-                    </div>
-                })
-            }
-        </div>
+        <>
+            <TodoList data={data} Todo={todo} setTodoEvent={setTodoEvent} setTodosEvent={setTodosEvent} setTodoCheckdEvent={setTodoCheckdEvent} setTodoDeleteEvent={setTodoDeleteEvent} />
+        </>
     )
 }
 
